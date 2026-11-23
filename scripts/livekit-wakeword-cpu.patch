@@ -1,0 +1,45 @@
+--- a/client/python/src/livekit/wakeword_train/loop.py
++++ b/client/python/src/livekit/wakeword_train/loop.py
+@@ -12,6 +12,7 @@
+ import logging
+ import math
+ import time
++from collections.abc import Callable
+ from dataclasses import dataclass, field
+ 
+ import numpy as np
+@@ -90,7 +91,7 @@
+         cfg = self.cfg
+         wi = get_worker_info()
+         wid, nw = (wi.id, wi.num_workers) if wi else (0, 1)
+-        rng = np.random.default_rng(cfg.seed * 1000 + wid + int(time.time()) % 100000)
++        rng = np.random.default_rng(cfg.seed * 1000 + wid)
+         sets = D.load_clipsets(self.dataset)
+         pos, adv, tts = sets["positive"], sets["adversarial"], sets["speech"]
+         if cfg.n_adv and not len(adv) and wid == 0:  # e.g. languages without confusable phrases
+@@ -153,6 +154,7 @@
+     device: str | None = None,
+     log_every: int = 500,
+     teacher: nn.Module | None = None,
++    on_step: Callable[[int, Detector, float, float], None] | None = None,
+ ) -> Detector:
+     """Train `det` on a bench dataset (dir or HF repo; several are merged) and return the EMA
+     weights. With `teacher`, its scores on each augmented batch are soft targets (NaN: unscored);
+@@ -196,7 +198,7 @@
+         _Stream(dataset, cfg),
+         batch_size=None,
+         num_workers=cfg.workers,
+-        prefetch_factor=4,
++        prefetch_factor=4 if cfg.workers else None,
+         persistent_workers=cfg.workers > 0,
+         timeout=900 if cfg.workers > 0 else 0,
+         pin_memory=device == "cuda",
+@@ -252,6 +254,8 @@
+                 else:  # counters and the fixed log-mel settings
+                     e.copy_(p)
+         hist.append(loss.detach().item())
++        if on_step is not None:
++            on_step(step + 1, ema, hist[-1], float(sched.get_last_lr()[0]))
+         if (step + 1) % log_every == 0:
+             logger.info(
+                 "step %d/%d  loss %.4f  %.2fs/step",

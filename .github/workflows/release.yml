@@ -1,0 +1,47 @@
+name: Release wake-word models
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: model-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Prepare model assets
+        shell: bash
+        run: |
+          python scripts/package_release.py --tag "$GITHUB_REF_NAME" --out dist/release
+          (cd dist/release && sha256sum -c SHA256SUMS)
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag="$GITHUB_REF_NAME"
+          if draft=$(gh release view "$tag" --json isDraft --jq .isDraft); then
+            if [[ "$draft" == false ]]; then
+              gh release view "$tag" --json url --jq .url
+              exit 0
+            fi
+          else
+            gh release create "$tag" --verify-tag --draft --title "Goodwin Wakeword $tag" --generate-notes
+          fi
+          gh release upload "$tag" dist/release/* --clobber
+          gh release edit "$tag" --draft=false

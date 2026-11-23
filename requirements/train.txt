@@ -1,0 +1,9 @@
+librosa==1.0.1
+matplotlib==3.11.2
+numpy==2.5.5
+onnx==1.23.2
+onnxruntime==1.32.0
+onnxsim==0.8.1
+pydantic==2.14.4
+PyYAML==6.0.4
+safetensors==0.8.0

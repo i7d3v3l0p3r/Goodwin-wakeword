@@ -1,0 +1,63 @@
+[
+  {
+    "id": "goodwin-standard",
+    "filename": "goodwin-standard.onnx",
+    "wake_word": "Гудвин",
+    "language": "ru",
+    "runtime": "livekit-v2-standard-onnx",
+    "tier": "standard",
+    "format": "onnx",
+    "sample_rate_hz": 16000,
+    "score_threshold": 0.5,
+    "goodwin_compatible": true
+  },
+  {
+    "id": "goodwin-micro",
+    "filename": "goodwin-micro.onnx",
+    "wake_word": "Гудвин",
+    "language": "ru",
+    "runtime": "livekit-v2-micro-onnx",
+    "tier": "micro",
+    "format": "onnx",
+    "sample_rate_hz": 16000,
+    "score_threshold": 0.5,
+    "goodwin_compatible": true
+  },
+  {
+    "id": "egor-standard",
+    "filename": "egor-standard.onnx",
+    "wake_word": "Егор",
+    "language": "ru",
+    "runtime": "livekit-v2-standard-onnx",
+    "tier": "standard",
+    "format": "onnx",
+    "sample_rate_hz": 16000,
+    "score_threshold": 0.5,
+    "goodwin_compatible": true
+  },
+  {
+    "id": "egor-micro",
+    "filename": "egor-micro.onnx",
+    "wake_word": "Егор",
+    "language": "ru",
+    "runtime": "livekit-v2-micro-onnx",
+    "tier": "micro",
+    "format": "onnx",
+    "sample_rate_hz": 16000,
+    "score_threshold": 0.5,
+    "goodwin_compatible": true
+  },
+  {
+    "id": "goodwin-micro-int8",
+    "filename": "goodwin-micro-int8.tflite",
+    "wake_word": "Гудвин",
+    "language": "ru",
+    "runtime": "livekit-v2-micro-tflite",
+    "tier": "micro",
+    "format": "tflite",
+    "quantization": "int8",
+    "sample_rate_hz": 16000,
+    "score_threshold": 0.390625,
+    "goodwin_compatible": false
+  }
+]
