@@ -12,9 +12,9 @@ Use `source .venv/bin/activate` on Linux. Set `OPENROUTER_API_KEY` in the enviro
 
 ## Choose a phrase
 
-Use [goodwin.json](../profiles/goodwin.json) or [egor.json](../profiles/egor.json). To add a wake word, copy one of these profiles and edit the fields.
+Use [goodwin.json](../profiles/goodwin.json), [egor.json](../profiles/egor.json), or [artem.json](../profiles/artem.json). To add a wake word, copy one of these profiles and edit the fields.
 
-- `phrase` is the display and training text. `aliases` are lowercase spellings that the local transcriber can return for that phrase.
+- `phrase` is the display and training text. `aliases` are lowercase spellings that the local transcriber can return for that phrase. Use `е` in aliases because the transcriber normalizer folds `ё` to `е`.
 - `probe` contains the phrase in a short request. `probe_words` are the other words that verify intelligible Russian speech.
 - `positive` contains the isolated phrase and requests with the wake word in different positions.
 - `negative` contains `["adversarial", "…"]` near misses or `["speech", "…"]` ordinary speech.
@@ -36,6 +36,8 @@ python scripts/wakeword_dataset.py generate --root $root --profile $profile --vo
 
 The probe and generation commands send paid TTS requests. The example probes one voice per model. Use `--model <model-id>` to narrow the models, and raise or omit `--voices-per-model` to broaden coverage. The probe and generation filters should match. Set a spending limit on the API key and adjust `--reserve` and `--workers` for the run. The local journal resumes completed work. Use `--retry` to revisit transient failures. The initial probe loads the local Whisper model, downloading its weights when absent.
 
+For «Артём», use `datasets/artem` and `profiles/artem.json`. Pass `--rounds 10` to `generate` to cover all primary prompts.
+
 Run `fill` to add prompts for underrepresented classes, `recover` to realign review clips, or `derive` to extract aligned excerpts from existing audio. Pass the same `--root` and `--profile` for each command.
 
 ## Add background audio and export
@@ -45,7 +47,7 @@ Download the [MUSAN music shard](https://huggingface.co/datasets/corypaik/musan/
 ```powershell
 python scripts/wakeword_background.py --root $root --profile $profile --music-parquet target/music.parquet --speech-parquet target/speech.parquet
 python scripts/wakeword_dataset.py report --root $root --profile $profile
-python scripts/wakeword_export.py --root $root
+python scripts/wakeword_export.py --root $root --profile $profile
 ```
 
 The trainer reads `manifest.jsonl` and its referenced audio. The last command optionally writes deduplicated WakeWord Bench Parquet shards under `data/`. Review `summary.json`, `coverage.csv`, and any clips under `.review/` before training.

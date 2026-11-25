@@ -18,7 +18,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import soundfile as sf
 
-from wakeword_dataset import RATE, read_json, write_json
+from wakeword_dataset import DEFAULT_PROFILE, RATE, PhraseProfile, read_json, word_match, write_json
 
 
 def parquet_schema():
@@ -61,7 +61,7 @@ def inspect_file(root, row):
     return hashlib.sha256(pcm).hexdigest()
 
 
-def parquet_row(root, row, schema):
+def parquet_row(root, row, schema, profile=DEFAULT_PROFILE):
     path = root / row["path"]
     audio, _ = sf.read(path, dtype="float32")
     flac = io.BytesIO()
@@ -73,9 +73,10 @@ def parquet_row(root, row, schema):
     voice = row.get("voice") or ""
     model = row.get("model") or ""
     category = row["category"]
+    text = row.get("text") or ""
     meta = {
-        **row, "wake_word": "Гудвин", "text": row.get("text") or "",
-        "phrase": "Гудвин" if row["label"] else row["text"].split()[0] if category == "adversarial" else "",
+        **row, "wake_word": profile.phrase, "text": text,
+        "phrase": profile.phrase if row["label"] else row["text"].split()[0] if category == "adversarial" else "",
         "provider": row.get("provider") or (model.split("/")[0] if model else "fleurs" if background == "speech" else "musan"),
         "model": model, "voice_id": row.get("group", "") if model else "", "voice_name": voice,
         "held_out_voice": bool(model and row["split"] == "test"),
@@ -83,7 +84,7 @@ def parquet_row(root, row, schema):
         "noise_category": background, "noise_source": row.get("source", ""),
         "noise_file": row.get("source_recording", ""),
         "speed": 1.0, "adversarial_distance": -1, "codec": "none", "bandlimit": "none",
-        "text_form": "isolated" if row.get("text", "").strip("!.?").casefold() == "гудвин" else
+        "text_form": "isolated" if row["label"] and word_match(text, profile) else
         "carrier_prefix" if row["label"] else "transcript" if category == "real_speech" else "",
         "level_dbfs": 20 * math.log10(max(1e-8, float(np.sqrt(np.mean(audio**2))))),
         "onset_s": onset, "offset_s": offset,
@@ -105,7 +106,7 @@ def parquet_row(root, row, schema):
     return values
 
 
-def export(root):
+def export(root, profile=DEFAULT_PROFILE):
     manifest = root / "manifest.jsonl"
     with manifest.open(encoding="utf-8") as stream:
         rows = [json.loads(line) for line in stream]
@@ -143,7 +144,7 @@ def export(root):
             batch = items[index:index + 250]
             destination = target / f"{split}-{index // 250:05d}.parquet"
             temporary = destination.with_suffix(".parquet.part")
-            pq.write_table(pa.Table.from_pylist([parquet_row(root, row, schema) for row in batch], schema=schema),
+            pq.write_table(pa.Table.from_pylist([parquet_row(root, row, schema, profile) for row in batch], schema=schema),
                            temporary, row_group_size=100)
             temporary.replace(destination)
             count = pq.ParquetFile(destination).metadata.num_rows
@@ -188,4 +189,7 @@ def export(root):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("datasets/goodwin"))
-    export(parser.parse_args().root)
+    parser.add_argument("--profile", type=Path, help="JSON file with the exported wake phrase")
+    args = parser.parse_args()
+    profile = PhraseProfile(**read_json(args.profile)) if args.profile else DEFAULT_PROFILE
+    export(args.root, profile)

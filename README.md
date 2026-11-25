@@ -6,6 +6,7 @@ Russian wake-word models and tools for [Goodwin](https://github.com/i7d3v3l0p3r/
 | --- | --- | --- | --- |
 | Гудвин | [goodwin-standard.onnx](models/goodwin-standard.onnx) | [goodwin-micro.onnx](models/goodwin-micro.onnx) | [goodwin-micro-int8.tflite](models/goodwin-micro-int8.tflite) |
 | Егор | [egor-standard.onnx](models/egor-standard.onnx) | [egor-micro.onnx](models/egor-micro.onnx) | |
+| Артём | [artem-standard.onnx](models/artem-standard.onnx) | [artem-micro.onnx](models/artem-micro.onnx) | [artem-micro-int8.tflite](models/artem-micro-int8.tflite) (experimental) |
 
 The «Гудвин» ONNX files are the default models bundled by Goodwin. The «Егор» models come from the expanded corpus run. See the [model notes](models/README.md) for provenance, evaluation, and attribution.
 

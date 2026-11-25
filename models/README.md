@@ -23,4 +23,16 @@ These are the ONNX exports from the expanded training run with the original 797-
 
 The small human test set contains three isolated pronunciations and eight occurrences inside a sentence. The recorded results describe offline WAV evaluation. Detection rates on the physical Station may differ.
 
+## «Артём»
+
+The [phrase profile](../profiles/artem.json) includes isolated pronunciations, commands, and close negatives such as «Артёму» and «Артёмушка». Training uses synthetic speech from Silero V4 and Piper, plus background audio from MUSAN and Russian FLEURS. The 250-clip test set includes 11 Common Voice recordings and synthetic clips from held-out voices. Each threshold was selected on validation.
+
+| Model | Score threshold | Human hits / 11 | Synthetic hits / 98 | False alarm clips / 141 |
+| --- | ---: | ---: | ---: | ---: |
+| Standard ONNX | 0.50 | 10 | 69 | 7 |
+| Micro ONNX | 0.50 | 4 | 52 | 0 |
+| Experimental Micro INT8 TFLite | 0.51953125 | 1 | 32 | 0 |
+
+At Goodwin's default ONNX threshold of 0.575, Standard detected 9 of 11 human clips and 59 of 98 synthetic clips, with zero false alarm clips. The 451,032-byte INT8 model requires a Goodwin build with the Micro TFLite runtime. These are offline results.
+
 The [model catalog](catalog.json) lists the downloadable files and runtimes. The models incorporate LiveKit's pretrained encoders and are distributed with the accompanying [license](LICENSE) and [notice](NOTICE).

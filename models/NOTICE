@@ -10,3 +10,10 @@ under the Apache License, Version 2.0. See LICENSE.
 
 The models were trained in part on synthetic speech. LiveKit makes no representation
 about how suitable they are for any particular use; see LICENSE for the warranty disclaimer.
+
+The Artem detector uses utterances synthesized with Silero V4 (Silero Team,
+https://github.com/snakers4/silero-models) and Piper Russian voices
+(https://huggingface.co/rhasspy/piper-voices). Training background audio comes
+from MUSAN (David Snyder, Guoguo Chen, and Daniel Povey, CC BY 4.0,
+https://www.openslr.org/17/) and FLEURS (Google, CC BY 4.0,
+https://huggingface.co/datasets/google/fleurs).
