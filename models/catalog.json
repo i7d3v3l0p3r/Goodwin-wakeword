@@ -94,7 +94,7 @@
     "format": "tflite",
     "quantization": "int8",
     "sample_rate_hz": 16000,
-    "score_threshold": 0.51953125,
+    "score_threshold": 0.46484375,
     "goodwin_compatible": false
   }
 ]

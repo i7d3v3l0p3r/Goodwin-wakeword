@@ -25,14 +25,16 @@ The small human test set contains three isolated pronunciations and eight occurr
 
 ## «Артём»
 
-The [phrase profile](../profiles/artem.json) includes isolated pronunciations, commands, and close negatives such as «Артёму» and «Артёмушка». Training uses synthetic speech from Silero V4 and Piper, plus background audio from MUSAN and Russian FLEURS. The 250-clip test set includes 11 Common Voice recordings and synthetic clips from held-out voices. Each threshold was selected on validation.
+The expanded models were trained with 2,990 positive clips, including 2,628 synthesized through OpenRouter. The [phrase profile](../profiles/artem.json) includes isolated pronunciations, commands, and close negatives such as «Артёму» and «Артёмушка». Training also uses Silero V4 and Piper synthetic speech and background audio from MUSAN and Russian FLEURS. Each operating threshold was selected on validation.
 
-| Model | Score threshold | Human hits / 11 | Synthetic hits / 98 | False alarm clips / 141 |
-| --- | ---: | ---: | ---: | ---: |
-| Standard ONNX | 0.50 | 10 | 69 | 7 |
-| Micro ONNX | 0.50 | 4 | 52 | 0 |
-| Experimental Micro INT8 TFLite | 0.51953125 | 1 | 32 | 0 |
+The original test includes 11 Common Voice recordings and 98 synthetic positives. The additional synthetic test uses 16 new prompts from 22 voice groups held out from training and validation.
 
-At Goodwin's default ONNX threshold of 0.575, Standard detected 9 of 11 human clips and 59 of 98 synthetic clips, with zero false alarm clips. The 451,032-byte INT8 model requires a Goodwin build with the Micro TFLite runtime. These are offline results.
+| Model | Score threshold | Human hits / 11 | Original synthetic hits / 98 | Original false alarm clips / 141 | New test hits / 165 | New false alarm clips / 169 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Standard ONNX | 0.50 | 9 | 61 | 0 | 131 | 18 |
+| Micro ONNX | 0.50 | 5 | 49 | 0 | 91 | 10 |
+| Experimental Micro INT8 TFLite | 0.46484375 | 5 | 38 | 0 | 80 | 4 |
+
+Goodwin's default ONNX threshold of 0.575 yielded zero Standard hits on both offline tests. Goodwin's ONNX sensitivity of about 64% corresponds to the operating threshold of 0.50. The 451,032-byte INT8 model requires a Goodwin build with the Micro TFLite runtime.
 
 The [model catalog](catalog.json) lists the downloadable files and runtimes. The models incorporate LiveKit's pretrained encoders and are distributed with the accompanying [license](LICENSE) and [notice](NOTICE).
