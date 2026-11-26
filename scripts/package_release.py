@@ -17,6 +17,21 @@ def sha256(path: Path) -> str:
         return hashlib.file_digest(source, "sha256").hexdigest()
 
 
+def esphome_assets(directory: Path) -> list[Path]:
+    assets = []
+    for manifest in sorted(directory.glob("*.json")):
+        entry = json.loads(manifest.read_text(encoding="utf-8"))
+        model = manifest.with_suffix(".tflite")
+        if entry.get("type") != "micro" or entry.get("version") != 2 or entry.get("model") != model.name:
+            raise ValueError(f"Invalid ESPHome model manifest: {manifest.name}")
+        if not model.is_file() or not model.stat().st_size:
+            raise ValueError(f"Missing or empty ESPHome model: {model.name}")
+        assets.extend((manifest, model))
+    if set(directory.glob("*.tflite")) - set(assets):
+        raise ValueError("ESPHome models must have a matching manifest")
+    return assets
+
+
 def package(tag: str, output: Path) -> None:
     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag):
         raise ValueError("Expected a release tag in the form vMAJOR.MINOR.PATCH")
@@ -35,6 +50,11 @@ def package(tag: str, output: Path) -> None:
         if not path.is_file() or not path.stat().st_size:
             raise ValueError(f"Missing or empty release asset: {filename}")
 
+    esphome = esphome_assets(MODELS / "esphome")
+    reserved_names = filenames | set(SUPPORT_FILES) | {"metadata.json", "SHA256SUMS"}
+    if reserved_names.intersection(asset.name for asset in esphome):
+        raise ValueError("An ESPHome asset has the same filename as another release asset")
+
     # A fresh directory prevents an older package's files from entering a new release.
     output.mkdir(parents=True, exist_ok=False)
     models = []
@@ -45,6 +65,8 @@ def package(tag: str, output: Path) -> None:
         models.append({**entry, "size_bytes": asset.stat().st_size, "sha256": sha256(asset)})
     for filename in SUPPORT_FILES:
         copyfile(MODELS / filename, output / filename)
+    for asset in esphome:
+        copyfile(asset, output / asset.name)
 
     metadata = {"schema_version": 1, "tag": tag, "models": models}
     with (output / "metadata.json").open("w", encoding="utf-8", newline="\n") as stream:

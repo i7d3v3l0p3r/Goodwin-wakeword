@@ -12,6 +12,18 @@ The ONNX files match the models bundled by Goodwin. The Standard model was fine-
 | Micro ONNX | 0.50 | 191 | 0 |
 | Micro INT8 TFLite | 0.390625 | 209 | 6 |
 
+### ESPHome microWakeWord
+
+The 40,448-byte [microWakeWord model](esphome/goodwin-microwakeword.tflite) is a streaming INT8 MixedNet trained from scratch on the «Гудвин» corpus. It takes three 10 ms microfrontend frames per inference. Both the model and its [ESPHome manifest](esphome/goodwin-microwakeword.json) are attached to the GitHub release.
+
+```yaml
+micro_wake_word:
+  models:
+    - model: https://github.com/i7d3v3l0p3r/Goodwin-wakeword/releases/download/v0.3.0/goodwin-microwakeword.json
+```
+
+With the manifest's threshold and eight-frame averaging window, TFLite Micro on x86-64 detected 228 of 290 synthetic positives with zero false alarms on 323 held-out negative clips. Median latency after the word was 160 ms. ESP32 hardware performance has yet to be measured.
+
 ## «Егор»
 
 These are the ONNX exports from the expanded training run with the original 797-clip held-out set. Both use a calibrated score threshold of 0.50.
@@ -37,4 +49,4 @@ The original test includes 11 Common Voice recordings and 98 synthetic positives
 
 Goodwin's default ONNX threshold of 0.575 yielded zero Standard hits on both offline tests. Goodwin's ONNX sensitivity of about 64% corresponds to the operating threshold of 0.50. The 451,032-byte INT8 model requires a Goodwin build with the Micro TFLite runtime.
 
-The [model catalog](catalog.json) lists the downloadable files and runtimes. The models incorporate LiveKit's pretrained encoders and are distributed with the accompanying [license](LICENSE) and [notice](NOTICE).
+The [model catalog](catalog.json) lists the LiveKit models and their runtimes. The release also includes the ESPHome files. See the model [license](LICENSE) and [notice](NOTICE) for attribution and terms.

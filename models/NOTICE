@@ -18,3 +18,9 @@ The Artem detector uses utterances synthesized through OpenRouter
 from MUSAN (David Snyder, Guoguo Chen, and Daniel Povey, CC BY 4.0,
 https://www.openslr.org/17/) and FLEURS (Google, CC BY 4.0,
 https://huggingface.co/datasets/google/fleurs).
+
+Goodwin microWakeWord was trained from scratch using Kevin Ahrendt's Apache 2.0
+microWakeWord toolkit (https://github.com/kahrendt/microWakeWord). Its training
+corpus uses Russian synthetic speech generated through OpenRouter and background
+audio from MUSAN and FLEURS, attributed above. The Goodwin microWakeWord weights
+are distributed under the Apache License, Version 2.0. See LICENSE.

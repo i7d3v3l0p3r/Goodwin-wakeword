@@ -21,3 +21,4 @@ __pycache__/
 *.tflite
 !/models/*.onnx
 !/models/*.tflite
+!/models/esphome/*.tflite

@@ -71,3 +71,25 @@ python scripts/wakeword_quantize_livekit.py --dataset datasets/goodwin --encoder
 ```
 
 The example writes `goodwin_micro.tflite`, `tflite_calibration.json`, and `tflite_evaluation.json` into the run directory.
+
+## ESPHome microWakeWord
+
+Use a separate Python 3.12 environment for the microWakeWord trainer. It builds a streaming MixedNet that takes three 10 ms microfrontend frames per inference. The model requires a microWakeWord runtime.
+
+```powershell
+git clone https://github.com/kahrendt/microWakeWord.git target/microWakeWord
+git -C target/microWakeWord checkout 4665173cd35f1cff9a61e06fc427f124766c488e
+python -m venv .venv-microwakeword
+$py = ".venv-microwakeword/Scripts/python.exe"
+& $py -m pip install -r requirements/microwakeword.txt
+$env:PYTHONPATH = (Resolve-Path target/microWakeWord).Path
+$corpus = "datasets/goodwin"
+$run = "runs/goodwin-microwakeword"
+& $py scripts/wakeword_microwakeword.py prepare --dataset $corpus --out $run --steps 3000
+& $py scripts/wakeword_microwakeword.py train --out $run
+& $py scripts/wakeword_microwakeword.py export --out $run --checkpoint best_weights
+& $py scripts/wakeword_microwakeword.py export --out $run --checkpoint last_weights
+& $py scripts/wakeword_microwakeword.py evaluate --dataset $corpus --out $run
+```
+
+You can also export intermediate checkpoints from `$run/trainer/train` by passing `train/<checkpoint>` without the `.weights.h5` suffix. Evaluation selects the quantized checkpoint, ESPHome threshold and averaging window on validation audio with a 1% false-alarm clip budget. It then writes `goodwin-microwakeword.tflite`, `evaluation.json`, and `test_predictions.jsonl` from the selected model. The ESPHome manifest additionally needs a tensor arena size verified with TFLite Micro.

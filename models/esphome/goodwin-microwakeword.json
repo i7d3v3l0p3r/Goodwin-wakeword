@@ -1,0 +1,17 @@
+{
+  "type": "micro",
+  "wake_word": "Гудвин",
+  "author": "Goodwin project",
+  "model": "goodwin-microwakeword.tflite",
+  "trained_languages": [
+    "ru"
+  ],
+  "version": 2,
+  "micro": {
+    "probability_cutoff": 0.9784313725490196,
+    "sliding_window_size": 8,
+    "feature_step_size": 10,
+    "tensor_arena_size": 24576,
+    "minimum_esphome_version": "2026.6.0"
+  }
+}
